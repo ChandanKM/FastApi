@@ -12,39 +12,42 @@ server.listen(3000, startBench)
 const options = {
   hostname: 'https://jsonplaceholder.typicode.com',
   path: '/posts',
-  port: 80,
-  method: 'POST',
-  body: JSON.stringify(
-    { userId: 1,
-      id: 1,
-      title: 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit',
-      body: 'quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam nostrum rerum est autem sunt rem eveniet architecto'
-    }
-    )
+  method: 'POST'
 }
 
 
 function handle (req, res) 
 {
   const req1 = http.request(options, (res) => {
+
+    var data =  JSON.stringify(
+      { userId: 1,
+        id: 1,
+        title: 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit',
+        body: 'quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam nostrum rerum est autem sunt rem eveniet architecto'
+      }
+      )
+
     console.log(`statusCode: ${res.statusCode}`)
   
     res.on('data', (d) => {
-      console.error(d)
-      process.stdout.write(d)
+      data += d;
     })
-  })
-  
-  req1.on('error', (error) => 
+
+
+    res.on('end', () => {
+      console.log('Body: ', JSON.parse(data));
+    })
+
+
+  }).on('error', (error) => 
   {
-    res.end(JSON.stringify(error))
     console.error(error)
   })
-
-  
 }
 
-function startBench () {
+function startBench () 
+{
   autocannon({
     url: 'http://localhost:3000/',
     connections: 5, //default
@@ -52,7 +55,7 @@ function startBench () {
     duration: 5, // default
     requests: [
       {
-        path: '/'
+        path: '/posts'  
         // this will automatically add the pregenerated auth token
       }
     ]
